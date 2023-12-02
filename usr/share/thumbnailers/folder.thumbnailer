@@ -1,0 +1,4 @@
+[Thumbnailer Entry]
+TryExec=/usr/bin/folder-thumbnailer
+Exec=/usr/bin/folder-thumbnailer %s %i %o %u
+MimeType=inode/directory;

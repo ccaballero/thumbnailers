@@ -1,0 +1,26 @@
+#!/bin/bash
+set -euo pipefail
+IFS=$'\n\t'
+
+if [ -z "$1" ]; then exit 0; fi
+
+INFILE="$1"
+OUTFILE="$2"
+SIZE="$3"
+TMP_DIR=$(mktemp -d /tmp/.comics-thumbnailer-XXXXXX)
+EXTENSION=${INFILE##*.}
+
+case $EXTENSION in
+   cbr) COVER_FILE="$( /opt/bin/rar lb "${INFILE}" | egrep -i "\.jpe?g|\.png|\.webp" | sort | head -1 )"
+       /opt/bin/rar e "${INFILE}" "*${COVER_FILE}" "${TMP_DIR}";;
+   cbz) COVER_FILE="$( /usr/bin/unzip -l "${INFILE}" | egrep -i "\.jpe?g|\.png|\.webp" | cut -c 31- | sort | head -1)"
+       /usr/bin/unzip "${INFILE}" "${COVER_FILE}" -d "${TMP_DIR}";;
+esac
+
+LS=$(ls ${TMP_DIR})
+
+if [ -f "${TMP_DIR}/${LS}" ]; then
+    convert "${TMP_DIR}/${LS}" -resize "${SIZE}x${SIZE}" "${OUTFILE}"
+fi
+
+rm -R "$TMP_DIR"
